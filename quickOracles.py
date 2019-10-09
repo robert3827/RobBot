@@ -6,9 +6,10 @@ import random
 
 class quickOracles(sc2.BotAI):
     def __init__(self):
-        self.TECH_TREE = [PYLON, GATEWAY, CYBERNETICSCORE]
+        self.TECH_TREE = [PYLON, GATEWAY, CYBERNETICSCORE, GATEWAY]
         #self.PROD = []
-        WORKERCAP = 
+        WORKERCAP = 50
+        
     async def on_step(self, iteration):
         await self.distribute_workers()
         await self.build_workers()
@@ -16,6 +17,7 @@ class quickOracles(sc2.BotAI):
         await self.build_assimilators()
         await self.expand()
         await self.techTree()
+        await self.production()
 
     async def build_workers(self):
         for nexus in self.units(NEXUS).ready.noqueue:
@@ -54,13 +56,32 @@ class quickOracles(sc2.BotAI):
             return self.enemy_start_locations[0]
 
     async def techTree(self):
-        for tech in TECH_TREE:
-            if self.can_afford(tech) and not self.units(tech).ready.exists and not self.already_pending(GATEWAY):
-               await self.build(tech, near=pylon) 
-
+        if(self.units(PYLON).ready.exists):
+            pylon = self.units(PYLON).ready.random
+            counterDict = {}
+            for tech in self.TECH_TREE:
+                if not tech in counterDict.keys():
+                    counterDict[tech] = 1
+                else:
+                    counterDict[tech] += 1
                 
-            
-    #async def prod(self):
+                if self.can_afford(tech) and not self.already_pending(tech) and len(self.units(tech)) < counterDict[tech]:
+                    await self.build(tech, near=pylon)
+    
+    async def multiBuild(self, unit, count, nearCamp):
+        for ii in range(0,count):
+            await self.build(unit, near=nearCamp)
+
+                            
+    async def production(self):
+        if(self.units(CYBERNETICSCORE).ready.exists):
+            cyberCore = self.units(CYBERNETICSCORE).ready.random
+            for gw in self.units(GATEWAY).ready.noqueue:
+                if self.can_afford(STALKER) and self.supply_left > 0:
+                    await self.do(gw.train(STALKER))
+            if len(self.units(GATEWAY).ready.noqueue) == 0 and self.can_afford(GATEWAY) and not self.already_pending(GATEWAY):
+                await self.build(GATEWAY, near=cyberCore)
+        
 
 
 
