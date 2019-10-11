@@ -1,5 +1,5 @@
 import sc2
-
+from sc2.position import Point2
 from sc2.constants import *
 import random
 
@@ -29,7 +29,7 @@ class quickOracles(sc2.BotAI):
             nexuses = self.units(NEXUS).ready
             if nexuses.exists:
                 if self.can_afford(PYLON):
-                    await self.build(PYLON, near=nexuses.first)
+                    await self.build(PYLON, near=Point2((50,50)))
 
     async def build_assimilators(self):
         for nexus in self.units(NEXUS).ready:
@@ -81,6 +81,7 @@ class quickOracles(sc2.BotAI):
                     await self.do(gw.train(STALKER))
             if len(self.units(GATEWAY).ready.noqueue) == 0 and self.can_afford(GATEWAY) and not self.already_pending(GATEWAY):
                 await self.build(GATEWAY, near=cyberCore)
+
         
 
 
