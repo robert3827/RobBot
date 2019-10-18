@@ -10,6 +10,10 @@ class quickOracles(sc2.BotAI):
         #self.PROD = []
         WORKERCAP = 50
         
+    @staticmethod 
+    def distance(posX, posY):
+        return ((posX.X()-posY.X())**2)+ ((posX.Y()-posY.Y())**2)
+
     async def on_step(self, iteration):
         await self.distribute_workers()
         await self.build_workers()
@@ -18,6 +22,8 @@ class quickOracles(sc2.BotAI):
         await self.expand()
         await self.techTree()
         await self.production()
+        await self.selfDefense()
+
 
     async def build_workers(self):
         for nexus in self.units(NEXUS).ready.noqueue:
@@ -82,7 +88,14 @@ class quickOracles(sc2.BotAI):
             if len(self.units(GATEWAY).ready.noqueue) == 0 and self.can_afford(GATEWAY) and not self.already_pending(GATEWAY):
                 await self.build(GATEWAY, near=cyberCore)
 
-        
+    async def selfDefense(self):
+        for enemy in self.known_enemy_units:
+            for unit in self.units:
+                if(unit != PROBE and self.distance(unit.position, enemy.position)< 69):
+                    unit.attack(enemy)
+    
+                    
+
 
 
 
